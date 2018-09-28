@@ -18,11 +18,13 @@ class Formulaic
 		#formulas as args. arrkeys must include key and that value at that key must be non nil
 		counter = 0
 		vars.each {|key, val| counter += 1 if (arrkeys.include?(key) && vars[key])}
-		1 >= (counter - arrkeys.length)
+		1 == (counter - arrkeys.length)
 	end
 	
 	def retUnknown(arrkeys)
 		###return the unknown determined to exist in pos
+		vars.each {|key, val| return key if !arrkeys.include?(key)}
+		:errorKey #Lazy error control is ok for early projects
 	end
 	
 	def cross?(formulaic)
@@ -70,21 +72,24 @@ class Kinematic < Formulaic
 		prev = vars.clone
 		
 		loop do
+			prev = vars.clone
 			###could find missing, store in array, enter each into each equation
 			###make poss return the key not included (what to solve for)***good idea
 			###write another method using poss to return which equations are possible (maybe doable)
 			###if not then find a way to run through each, short circuiting if completed
 			
-			#formulas
-			#poss each
-			#
-			#
+			#need control structure for if flag boolean is false so that vatUnk is not created (ternary?) EDIT: current fix...
+			vatPoss = poss(formulas[:vat])
+			datPoss = poss(formulas[:dat])
+			twenty2Poss = poss(formulas[:twenty2])
 			
-			vatPoss = formulas[:vat]
-			datPoss = formulas[:dat]
-			twenty2Poss = formulas[:twenty2]
+			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil
+			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil
+			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil
 			
-			
+			vars[vatUnk] = vat(vatUnk) if vatUnk
+			vars[datUnk] = dat(datUnk) if datUnk
+			vars[twenty2Unk] = twenty2(twenty2Unk) if twenty2Unk
 			break if prev == vars
 		end
 	end
