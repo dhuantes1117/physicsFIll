@@ -1,20 +1,28 @@
 #Physics fill
-
+END{
+	puts "That's all folks!"
+}
 class Formulaic
 	###encapsulation
-	attr_accessor :id, :unit, :constants, :vars, :overlap, :formulas
+	attr_accessor :id, :unit, :constants, :vars, :overlap, :formulas, :master
 	###constructors
 	def initialize(id, unit, vars)
 			@id = id 				#int
 			@unit = unit 			#symbol
 			#filled hash with constants (9.8, 101300, etc)
 			@vars = vars 			#empty hash with possible vars
+			@master = [:xo, :xf, :vo, :vf, :a, :t]
 	end
 	
 	def poss(arrkeys)
+		#formulas as args. arrkeys must include key and that value at that key must be non nil
 		counter = 0
-		vars.each {|key, val| counter += 1 if arrkeys.include?(key)}
+		vars.each {|key, val| counter += 1 if (arrkeys.include?(key) && vars[key])}
 		1 >= (counter - arrkeys.length)
+	end
+	
+	def retUnknown(arrkeys)
+		###return the unknown determined to exist in pos
 	end
 	
 	def cross?(formulaic)
@@ -60,11 +68,23 @@ class Kinematic < Formulaic
 	def doAll
 		###preform possible equations entering values into vars until progress is not made
 		prev = vars.clone
+		
 		loop do
 			###could find missing, store in array, enter each into each equation
 			###make poss return the key not included (what to solve for)***good idea
 			###write another method using poss to return which equations are possible (maybe doable)
 			###if not then find a way to run through each, short circuiting if completed
+			
+			#formulas
+			#poss each
+			#
+			#
+			
+			vatPoss = formulas[:vat]
+			datPoss = formulas[:dat]
+			twenty2Poss = formulas[:twenty2]
+			
+			
 			break if prev == vars
 		end
 	end
@@ -118,9 +138,34 @@ end
 
 
 a = {a: -9.8, dx: 10, vo: 7, dy: nil}
-kine = Kinematic.new(1,2,3,4,5,6)
+kine = Kinematic.new()
+=begin
 #puts kine.input(0,0,0,0,0,0)
 puts kine.vars
 puts kine.constants[:g]
 puts kine.twenty2(:a)
 puts kine.vars[:a]
+###^ tests
+=end
+
+puts "physicsFill is now in Kinematics mode\n"+
+	"enter all numbers for which you have known values\n"+
+	"0:xo\n"+
+	"1:xf\n"+
+	"2:vo\n"+
+	"3:vf\n"+
+	"4:a\n"+
+	"5:t\n"
+arr = []
+(gets.chomp!).scan(/\d/).each{|a| arr << a.to_i}
+
+arr.each do|num|
+puts "value for " +kine.master[num].to_s
+kine.vars[kine.master[num]] = (gets.chomp!).to_f
+end
+
+
+
+
+
+
