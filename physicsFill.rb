@@ -23,8 +23,9 @@ class Formulaic
 	
 	def retUnknown(arrkeys)
 		###return the unknown determined to exist in pos
-		vars.each {|key, val| return key if !arrkeys.include?(key)}
-		:errorKey #Lazy error control is ok for early projects
+		vars.each {|key, val| return key if (!val && arrkeys.include?(key))}
+		:errorKey#Lazy error control is ok for early projects
+		#^ but not anymore: somehow since :errorkey is entered doAll is using retUnknown even if Poss evals false
 	end
 	
 	def cross?(formulaic)
@@ -78,22 +79,19 @@ class Kinematic < Formulaic
 			### write another method using poss to return which equations are possible (maybe doable)
 			### if not then find a way to run through each, short circuiting if completed
 			
-			#need control structure for if flag boolean is false so that vatUnk is not created (ternary?)
-			
       vatPoss = poss(formulas[:vat])				#boolean flag true if it is possible to calculate
-			datPoss = poss(formulas[:dat])				#boolean flag  "
-			twenty2Poss = poss(formulas[:twenty2])#boolean flag  "
+			datPoss = poss(formulas[:dat])				#boolean flag  					"
+			twenty2Poss = poss(formulas[:twenty2])#boolean flag  					"
 			puts "#{vatPoss} and #{datPoss} and #{twenty2Poss}"
 			
 			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil							#
 			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil							#
 			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil	#
-			##^^references a nil key^^
-			
+			puts "#{vatUnk} and  #{datUnk} and #{twenty2Unk} prior"
 			vatUnk ? vars[vatUnk] = vat(vatUnk) : 100
 			datUnk ? vars[datUnk] = dat(datUnk) : 100
 			twenty2Unk ? vars[twenty2Unk] = twenty2(twenty2Unk) : 100
-			
+			puts "#{vars} postor"
 			
 			break if prev == vars
 		end
