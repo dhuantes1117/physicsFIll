@@ -14,11 +14,11 @@ class Formulaic
 			@master = [:xo, :xf, :vo, :vf, :a, :t]
 	end
 	
-	def poss(arrkeys)
+	def poss(forms)
 		#formulas as args. arrkeys must include key and that value at that key must be non nil
 		counter = 0
-		vars.each {|key, val| counter += 1 if (arrkeys.include?(key) && vars[key])}
-		1 == (counter - arrkeys.length)
+		vars.each {|key, val| counter += 1 if (forms.include?(key) && val)}
+		1 == (forms.length - counter)
 	end
 	
 	def retUnknown(arrkeys)
@@ -73,23 +73,28 @@ class Kinematic < Formulaic
 		
 		loop do
 			prev = vars.clone
-			###could find missing, store in array, enter each into each equation
-			###make poss return the key not included (what to solve for)***good idea
-			###write another method using poss to return which equations are possible (maybe doable)
-			###if not then find a way to run through each, short circuiting if completed
+			### could find missing, store in array, enter each into each equation
+			### make poss return the key not included (what to solve for)***good idea
+			### write another method using poss to return which equations are possible (maybe doable)
+			### if not then find a way to run through each, short circuiting if completed
 			
-			#need control structure for if flag boolean is false so that vatUnk is not created (ternary?) EDIT: current fix...
-			vatPoss = poss(formulas[:vat])
-			datPoss = poss(formulas[:dat])
-			twenty2Poss = poss(formulas[:twenty2])
+			#need control structure for if flag boolean is false so that vatUnk is not created (ternary?)
 			
-			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil
-			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil
-			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil
+      vatPoss = poss(formulas[:vat])				#boolean flag true if it is possible to calculate
+			datPoss = poss(formulas[:dat])				#boolean flag  "
+			twenty2Poss = poss(formulas[:twenty2])#boolean flag  "
+			puts "#{vatPoss} and #{datPoss} and #{twenty2Poss}"
 			
-			vars[vatUnk] = vat(vatUnk) if vatUnk
-			vars[datUnk] = dat(datUnk) if datUnk
-			vars[twenty2Unk] = twenty2(twenty2Unk) if twenty2Unk
+			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil							#
+			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil							#
+			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil	#
+			##^^references a nil key^^
+			
+			vatUnk ? vars[vatUnk] = vat(vatUnk) : 100
+			datUnk ? vars[datUnk] = dat(datUnk) : 100
+			twenty2Unk ? vars[twenty2Unk] = twenty2(twenty2Unk) : 100
+			
+			
 			break if prev == vars
 		end
 	end
@@ -165,12 +170,12 @@ arr = []
 (gets.chomp!).scan(/\d/).each{|a| arr << a.to_i}
 
 arr.each do|num|
-puts "value for " +kine.master[num].to_s
-kine.vars[kine.master[num]] = (gets.chomp!).to_f
+	puts "value for " +kine.master[num].to_s
+	kine.vars[kine.master[num]] = (gets.chomp!).to_f
 end
 
+kine.doAll
 
-
-
+puts kine.vars
 
 
