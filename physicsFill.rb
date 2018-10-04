@@ -11,7 +11,8 @@ class Formulaic
 			@unit = unit 			#symbol
 			#filled hash with constants (9.8, 101300, etc)
 			@vars = vars 			#empty hash with possible vars
-			vars.to_a.flatten.each_with_index do |val, index|master << val if index.even?}
+			@master = []
+			vars.to_a.flatten.each_with_index{|val, index|master << val if index.even?}
 	end
 	
 	def poss(forms)
@@ -50,7 +51,7 @@ class Formulaic
 		formulas.each do |key, arrVal|
 			formFlag = poss(arrVal)
 			formUnk = formFlag ? retUnknown(arrVal) : nil
-			formUnk ? vars[formUnk] = this.send(key, formUnk)
+			formUnk ? vars[formUnk] = self.send(key, formUnk) : nil
 		end
 	end
 	
@@ -87,17 +88,8 @@ class Kinematic < Formulaic
 			### write another method using poss to return which equations are possible (maybe doable)
 			### if not then find a way to run through each, short circuiting if completed
 			
-      vatPoss = poss(formulas[:vat])				#boolean flag true if it is possible to calculate
-			datPoss = poss(formulas[:dat])				#boolean flag  					"
-			twenty2Poss = poss(formulas[:twenty2])#boolean flag  					"
-			
-			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil							#
-			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil							#
-			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil	#
-			puts "#{vatUnk} and  #{datUnk} and #{twenty2Unk} prior"
-			vatUnk ? vars[vatUnk] = vat(vatUnk) : 100
-			datUnk ? vars[datUnk] = dat(datUnk) : 100
-			twenty2Unk ? vars[twenty2Unk] = twenty2(twenty2Unk) : 100
+			puts "#{vars} prior"
+			searchAndDestroy
 			puts "#{vars} postor"
 			
 			break if prev == vars
@@ -179,18 +171,10 @@ class Projectile < Formulaic
 			### write another method using poss to return which equations are possible (maybe doable)
 			### if not then find a way to run through each, short circuiting if completed
 			
-      vatPoss = poss(formulas[:vat])				#boolean flag true if it is possible to calculate
-			datPoss = poss(formulas[:dat])				#boolean flag  					"
-			twenty2Poss = poss(formulas[:twenty2])#boolean flag  					"
-			puts "#{vatPoss} and #{datPoss} and #{twenty2Poss}"
-			
-			vatUnk = vatPoss ? retUnknown(formulas[:vat]) : nil							#
-			datUnk = datPoss ? retUnknown(formulas[:dat]) : nil							#
-			twenty2Unk = twenty2Poss ? retUnknown(formulas[:twenty2]) : nil	#
-			puts "#{vatUnk} and  #{datUnk} and #{twenty2Unk} prior"
-			vatUnk ? vars[vatUnk] = vat(vatUnk) : 100
-			datUnk ? vars[datUnk] = dat(datUnk) : 100
-			twenty2Unk ? vars[twenty2Unk] = twenty2(twenty2Unk) : 100
+      puts "#{vars} prior"
+      resolve
+      incite
+			searchAndDestroy
 			puts "#{vars} postor"
 			
 			break if prev == vars
@@ -352,13 +336,8 @@ puts kine.vars[:a]
 =end
 
 puts "physicsFill is now in Kinematics mode\n"+
-	"enter all numbers for which you have known values\n"+
-	"0:xo\n"+
-	"1:xf\n"+
-	"2:vo\n"+
-	"3:vf\n"+
-	"4:a\n"+
-	"5:t\n"
+	"enter all numbers for which you have known values"
+kine.master.each_with_index {|val, index| puts "#{index}:#{val}"}
 arr = []
 (gets.chomp!).scan(/\d/).each{|a| arr << a.to_i}
 
