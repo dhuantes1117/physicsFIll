@@ -145,7 +145,7 @@ end
 
 class Projectile < Formulaic
 	def initialize()
-		super(0, :kinematics, {theta:nil, xo:nil, xf:nil, yo:nil, yf:nil, vo:nil, vf:nil, t:nil, ay:9.8, ax:0, vox:nil, vfx:nil, voy:nil, vfy:nil, ymax:nil})
+		super(0, :kinematics, {theta:nil, xo:nil, xf:nil, yo:nil, yf:nil, vo:nil, vf:nil, t:nil, ay:-9.8, ax:0, vox:nil, vfx:nil, voy:nil, vfy:nil, ymax:nil})
 		@overlap = {a: [:forces], vo: [:energy], vf: [:energy], t: [:momentum]}
 		@constants = {g:9.8, axp: 0}
 		#TODO make formulas reflect adjusted
@@ -153,7 +153,7 @@ class Projectile < Formulaic
 	end
 
 	def initialize(*values)
-		super(0, :kinematics, {theta:values[0], xo:values[1], xf:values[2], yo:values[3], yf:values[4], vo:values[5], vf:values[6], t:values[7], ay:9.8, ax:0, vox:values[8], vfx:values[9], voy:values[10], vfy:values[11], ymax:values[12]})
+		super(0, :kinematics, {theta:values[0], xo:values[1], xf:values[2], yo:values[3], yf:values[4], vo:values[5], vf:values[6], t:values[7], ay:-9.8, ax:0, vox:values[8], vfx:values[9], voy:values[10], vfy:values[11], ymax:values[12]})
 		@overlap = {a: [:forces], vo: [:energy], vf: [:energy], t: [:momentum]}
 		@constants = {g:9.8, axp: 0}
 		#TODO make formulas reflect adjusted
