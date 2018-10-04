@@ -309,14 +309,14 @@ class Projectile < Formulaic
 	end
 	
 	#not formulas
-	def resolve(unknown)
+	def resolve
 		if (vars[:vo] && vars[:theta] && !vars[:vox] && !vars[:voy])
 			vars[:vox] = vars[:vo] * Math.cos(vars[:theta])
 			vars[:voy] = vars[:vo] * Math.sin(vars[:theta])
 		end
 	end
 	
-	def incite(unknown)
+	def incite
 		if (!vars[:vo] && vars[:vox] && vars[:voy])
 			vars[:vo] = (vars[:vox]**2 + vars[:voy]**2)**(1.0/2)
 		end
@@ -326,6 +326,7 @@ end
 
 a = {a: -9.8, dx: 10, vo: 7, dy: nil}
 kine = Kinematic.new()
+proj = Projectile.new()
 =begin
 #puts kine.input(0,0,0,0,0,0)
 puts kine.vars
@@ -335,17 +336,42 @@ puts kine.vars[:a]
 ###^ tests
 =end
 
-puts "physicsFill is now in Kinematics mode\n"+
+puts "Welcome to physicsFill\n"+
+	"choose a mode:\n"+
+	"0:1D Kinematics\n"+
+	"1:Projectile Kinematics\n"+
+	"2:Forces\n"
+	choice = gets.chomp!.to_i
+case choice
+when 0
+	puts "physicsFill is now in Kinematics mode\n"+
 	"enter all numbers for which you have known values"
-kine.master.each_with_index {|val, index| puts "#{index}:#{val}"}
-arr = []
-(gets.chomp!).scan(/\d/).each{|a| arr << a.to_i}
+	kine.master.each_with_index {|val, index| puts "#{index}:#{val}"}
+	arr = []
+	(gets.chomp!).scan(/\d+/).each{|a| arr << a.to_i}
 
-arr.each do|num|
-	puts "value for " +kine.master[num].to_s
-	kine.vars[kine.master[num]] = (gets.chomp!).to_f
-end
+	arr.each do|num|
+		puts "value for " +kine.master[num].to_s
+		kine.vars[kine.master[num]] = (gets.chomp!).to_f
+	end
+	kine.doAll
+	puts kine.vars
+when 1
+	puts "physicsFill is now in Projectile Kinematics mode\n"+
+	"enter all numbers for which you have known values"
+	proj.master.each_with_index {|val, index| puts "#{index}:#{val}" if (val != :ax ||val != :ay )}
+	arr = []
+	(gets.chomp!).scan(/\d+/).each{|a| arr << a.to_i}
 
-kine.doAll
-
-puts kine.vars
+	arr.each do|num|
+	puts "value for " +proj.master[num].to_s
+	proj.vars[proj.master[num]] = (gets.chomp!).to_f
+	end
+	
+	proj.doAll
+	puts proj.vars
+	
+	
+when 2
+	puts "Forces mode has not yet been implemented...\nsorry bout that"
+end	
