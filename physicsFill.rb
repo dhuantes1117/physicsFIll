@@ -173,6 +173,7 @@ class Projectile < Formulaic
       puts "#{vars} prior"
       resolve
       incite
+      incitef
 			searchAndDestroy
 			puts "#{vars} postor"
 			
@@ -207,40 +208,46 @@ class Projectile < Formulaic
 	
 	#values from angle and vo
 	def range(unknown)
-		#xf - xo = ((vo**2)*(Math.sin(2*theta)))/9.8
-		case unknown
-		when :xf
-			(((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay]) + vars[:xo]
-		when :xo
-			vars[:xf] - (((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay])
-		when :vo
-			(((vars[:xf] - vars[:xo]) * -vars[:ay]))/Math.sin(2 * (vars[:theta] / (180/Math::PI)))**(1/2.0)
-	  when :theta
-			(Math.asin((((vars[:xf] - vars[:xo]) * -vars[:ay])) / vars[:vo]**2) / 2) * (180/Math::PI)
+		if(vars[:yo] == 0 && vars[:yf] == 0) then
+			#xf - xo = ((vo**2)*(Math.sin(2*theta)))/9.8
+			case unknown
+			when :xf
+				(((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay]) + vars[:xo]
+			when :xo
+				vars[:xf] - (((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay])
+			when :vo
+				(((vars[:xf] - vars[:xo]) * -vars[:ay]))/Math.sin(2 * (vars[:theta] / (180/Math::PI)))**(1/2.0)
+			when :theta
+				(Math.asin((((vars[:xf] - vars[:xo]) * -vars[:ay])) / vars[:vo]**2) / 2) * (180/Math::PI)
+			end
 		end
 	end
 	
 	def maxY(unknown)
-		#ymax = ((vo**2)*(Math.sin(theta)**2))/(2g)
-		case unknown
-		when :ymax
-			(((vars[:vo]**2) * (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / (2 * -vars[:ay]))
-		when :vo
-			((vars[:ymax] * (2 * -vars[:ay])) / (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / 2
-		when :theta
-			(Math.asin(((vars[:ymax] * (2 * -vars[:ay])) / (vars[:vo]**2))**(1/2.0))) * (180/Math::PI)
+		if(vars[:yo] == 0 && vars[:yf] == 0) then
+			#ymax = ((vo**2)*(Math.sin(theta)**2))/(2g)
+			case unknown
+			when :ymax
+				(((vars[:vo]**2) * (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / (2 * -vars[:ay]))
+			when :vo
+				((vars[:ymax] * (2 * -vars[:ay])) / (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / 2
+			when :theta
+				(Math.asin(((vars[:ymax] * (2 * -vars[:ay])) / (vars[:vo]**2))**(1/2.0))) * (180/Math::PI)
+			end
 		end
 	end
 	
 	def tfv(unknown)
-		#t = (2 * vo * Math.sin(theta))/g
-		case unknown
-		when :t
-			(((2 * vars[:vo]) * (Math.sin(vars[:theta] / (180/Math::PI)))) / -vars[:ay])
-		when :vo
-			((vars[:t] * -vars[:ay]) / (Math.sin(vars[:theta] / (180/Math::PI)))) / 2
-		when :theta
-			Math.asin((vars[:t] * -vars[:ay]) / (2 * vars[:vo])) * (180/Math::PI)
+		if(vars[:yo] == 0 && vars[:yf] == 0) then
+			#t = (2 * vo * Math.sin(theta))/g
+			case unknown
+			when :t
+				(((2 * vars[:vo]) * (Math.sin(vars[:theta] / (180/Math::PI)))) / -vars[:ay])
+			when :vo
+				((vars[:t] * -vars[:ay]) / (Math.sin(vars[:theta] / (180/Math::PI)))) / 2
+			when :theta
+				Math.asin((vars[:t] * -vars[:ay]) / (2 * vars[:vo])) * (180/Math::PI)
+			end
 		end
 	end
 	
@@ -311,14 +318,20 @@ class Projectile < Formulaic
 	#not formulas
 	def resolve
 		if (vars[:vo] && vars[:theta] && !vars[:vox] && !vars[:voy]) then
-			vars[:vox] = vars[:vo] * Math.cos(vars[:theta])
-			vars[:voy] = vars[:vo] * Math.sin(vars[:theta])
+			vars[:vox] = vars[:vo] * Math.cos(vars[:theta] / (180.0/Math::PI))
+			vars[:voy] = vars[:vo] * Math.sin(vars[:theta] / (180.0/Math::PI))
 		end
 	end
 	
 	def incite
 		if (!vars[:vo] && vars[:vox] && vars[:voy]) then
 			vars[:vo] = (vars[:vox]**2 + vars[:voy]**2)**(1.0/2)
+		end
+	end
+	
+	def incitef
+		if (!vars[:vf] && vars[:vfx] && vars[:vfy]) then
+			vars[:vf] = -1 * (vars[:vfx]**2.0 + vars[:vfy]**2.0)**(1.0/2)
 		end
 	end
 end
@@ -335,55 +348,62 @@ puts kine.vars[:a]
 ###^ tests
 =end
 
-def unitTestVerbose
-	form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
-	puts form.vars
-	hash = {}
-	arr = []
-	form.methods.each do |val|
-		if (form.formulas.include?(val.to_sym)) then
-			valSymbol = form.formulas[val.to_sym][0]
-			puts valSymbol.to_s
-			trueVal =  form.vars[valSymbol]
-			puts trueVal.to_s
-			calculatedVal = form.send(val, valSymbol)
-			puts calculatedVal.to_s
-			#solved value = projectile.vat(unknownKey)
-			#if solved value doesn't equal programmed
-			if (trueVal != calculatedVal) then
-				hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
-			end
-			end
+class UnitTest
+	def initialize(tf)
+		tf ? unitTestVerbose : unitTest
 	end
-	hash.each {|key, val| arr << val}
-	puts arr.join("\n")
-	puts "exiting unit test"
+	
+	def unitTestVerbose
+		form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
+		puts form.vars
+		hash = {}
+		arr = []
+		form.methods.each do |val|
+			if (form.formulas.include?(val.to_sym)) then
+				valSymbol = form.formulas[val.to_sym][0]
+				puts valSymbol.to_s
+				trueVal =  form.vars[valSymbol]
+				puts trueVal.to_s
+				calculatedVal = form.send(val, valSymbol)
+				puts calculatedVal.to_s
+				#solved value = projectile.vat(unknownKey)
+				#if solved value doesn't equal programmed
+				if (trueVal != calculatedVal) then
+					hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
+				end
+				end
+		end
+		hash.each {|key, val| arr << val}
+		puts arr.join("\n")
+		puts "exiting unit test"
+	end
+
+	def unitTest
+		form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
+		hash = {}
+		arr = []
+		form.methods.each do |val|
+			if (form.formulas.include?(val.to_sym)) then
+				valSymbol = form.formulas[val.to_sym][0]
+				trueVal =  form.vars[valSymbol]
+				calculatedVal = form.send(val, valSymbol)
+				#solved value = projectile.vat(unknownKey)
+				#if solved value doesn't equal programmed
+				if (trueVal != calculatedVal) then
+					hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
+				end
+				end
+		end
+		hash.each {|key, val| arr << val}
+	end
 end
 
-def unitTest
-	form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
-	hash = {}
-	arr = []
-	form.methods.each do |val|
-		if (form.formulas.include?(val.to_sym)) then
-			valSymbol = form.formulas[val.to_sym][0]
-			trueVal =  form.vars[valSymbol]
-			calculatedVal = form.send(val, valSymbol)
-			#solved value = projectile.vat(unknownKey)
-			#if solved value doesn't equal programmed
-			if (trueVal != calculatedVal) then
-				hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
-			end
-			end
-	end
-	hash.each {|key, val| arr << val}
-end
 
 
 
 
 
-unitTest
+UnitTest.new(true)
 
 puts "Welcome to physicsFill\n"+
 	"choose a mode:\n"+
@@ -404,7 +424,7 @@ when 0
 		kine.vars[kine.master[num]] = (gets.chomp!).to_f
 	end
 	kine.doAll
-	puts kine.vars
+	kine.vars.each{|key, val| puts "#{key}: #{(val * 100).ceil / 100.0}"}
 when 1
 	puts "physicsFill is now in Projectile Kinematics mode\n"+
 	"enter all numbers for which you have known values"
@@ -418,7 +438,7 @@ when 1
 	end
 	
 	proj.doAll
-	puts proj.vars
+	proj.vars.each{|key, val| puts "#{key}: #{(val * 100).ceil / 100.0}"}
 	
 	
 when 2
