@@ -87,9 +87,8 @@ class Kinematic < Formulaic
 			### write another method using poss to return which equations are possible (maybe doable)
 			### if not then find a way to run through each, short circuiting if completed
 			
-			puts "#{vars} prior"
+			puts "crunching your numbers..."
 			searchAndDestroy
-			puts "#{vars} postor"
 			
 			break if prev == vars
 		end
@@ -169,13 +168,11 @@ class Projectile < Formulaic
 			### make poss return the key not included (what to solve for)***good idea
 			### write another method using poss to return which equations are possible (maybe doable)
 			### if not then find a way to run through each, short circuiting if completed
-			
-      puts "#{vars} prior"
+			puts "crunching your numbers..."
       resolve
       incite
       incitef
 			searchAndDestroy
-			puts "#{vars} postor"
 			
 			break if prev == vars
 		end
@@ -403,7 +400,7 @@ end
 
 
 
-UnitTest.new(true)
+UnitTest.new(false)
 
 puts "Welcome to physicsFill\n"+
 	"choose a mode:\n"+
