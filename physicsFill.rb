@@ -224,9 +224,9 @@ class Projectile < Formulaic
 		#ymax = ((vo**2)*(Math.sin(theta)**2))/(2g)
 		case unknown
 		when :ymax
-			(((vars[:vo]**2) * (Math.sin((vars[:theta] / (180/Math::PI))**2))) / (2 * -vars[:ay]))
+			(((vars[:vo]**2) * (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / (2 * -vars[:ay]))
 		when :vo
-			((vars[:ymax] * (2 * -vars[:ay])) / (Math.sin((vars[:theta] / (180/Math::PI))**2))) / 2
+			((vars[:ymax] * (2 * -vars[:ay])) / (Math.sin((vars[:theta] / (180/Math::PI)))**2)) / 2
 		when :theta
 			(Math.asin(((vars[:ymax] * (2 * -vars[:ay])) / (vars[:vo]**2))**(1/2.0))) * (180/Math::PI)
 		end
@@ -236,11 +236,11 @@ class Projectile < Formulaic
 		#t = (2 * vo * Math.sin(theta))/g
 		case unknown
 		when :t
-			(((2 * vars[:vo]) * (Math.sin(vars[:theta]))) / -vars[:ay])
+			(((2 * vars[:vo]) * (Math.sin(vars[:theta] / (180/Math::PI)))) / -vars[:ay])
 		when :vo
-			((vars[:t] * -vars[:ay]) / (Math.sin(vars[:theta]))) / 2
+			((vars[:t] * -vars[:ay]) / (Math.sin(vars[:theta] / (180/Math::PI)))) / 2
 		when :theta
-			Math.asin((vars[:t] * -vars[:ay]) / (2 * vars[:vo]))
+			Math.asin((vars[:t] * -vars[:ay]) / (2 * vars[:vo])) * (180/Math::PI)
 		end
 	end
 	
@@ -335,7 +335,7 @@ puts kine.vars[:a]
 ###^ tests
 =end
 
-def unitTest
+def unitTestVerbose
 	form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
 	puts form.vars
 	hash = {}
@@ -358,6 +358,25 @@ def unitTest
 	hash.each {|key, val| arr << val}
 	puts arr.join("\n")
 	puts "exiting unit test"
+end
+
+def unitTest
+	form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
+	hash = {}
+	arr = []
+	form.methods.each do |val|
+		if (form.formulas.include?(val.to_sym)) then
+			valSymbol = form.formulas[val.to_sym][0]
+			trueVal =  form.vars[valSymbol]
+			calculatedVal = form.send(val, valSymbol)
+			#solved value = projectile.vat(unknownKey)
+			#if solved value doesn't equal programmed
+			if (trueVal != calculatedVal) then
+				hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
+			end
+			end
+	end
+	hash.each {|key, val| arr << val}
 end
 
 
