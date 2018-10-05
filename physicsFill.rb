@@ -80,7 +80,6 @@ class Kinematic < Formulaic
 	def doAll
 		###preform possible equations entering values into vars until progress is not made
 		prev = vars.clone
-		
 		loop do
 			prev = vars.clone
 			### could find missing, store in array, enter each into each equation
@@ -149,7 +148,7 @@ class Projectile < Formulaic
 		@overlap = {a: [:forces], vo: [:energy], vf: [:energy], t: [:momentum]}
 		@constants = {g:9.8, axp: 0}
 		#TODO make formulas reflect adjusted
-		@formulas = {vfox:[:vox, :vfx], vot:[:xf, :xo, :vox, :t], range:[:xf, :xo, :vo, :theta], maxY:[:ymax, :vo, :theta], tfv:[:t, :vo, :theta], vat:[:vfy, :voy, :t], dat:[:yf, :yo, :voy, :t], twenty2:[:vfy, :voy, :yo, :yf], soloMax:[:voy, :ymax, :yo]}
+		@formulas = {vfox:[:vox, :vfx], vot:[:xf, :xo, :vox, :t], range:[:xf, :xo, :vo, :theta], maxY:[:ymax, :vo, :theta], tfv:[:t, :vo, :theta], vat:[:vfy, :voy, :t], dat:[:yf, :yo, :voy, :t], twenty2:[:vfy, :voy, :yo, :yf], soloMax:[:voy, :ymax, :yo], voof:[:theta, :vox, :voy]}
 	end
 
 	def initialize(*values)
@@ -211,13 +210,13 @@ class Projectile < Formulaic
 		#xf - xo = ((vo**2)*(Math.sin(2*theta)))/9.8
 		case unknown
 		when :xf
-			(((vars[:vo]**2) * (Math.sin(2 * vars[:theta]))) / vars[:ay]) + vars[:xo]
+			(((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay]) + vars[:xo]
 		when :xo
-			vars[:xf] - (((vars[:vo]**2) * (Math.sin(2 * vars[:theta])))/vars[:ay])
+			vars[:xf] - (((vars[:vo]**2) * (Math.sin(2 * (vars[:theta] / (180/Math::PI))))) / -vars[:ay])
 		when :vo
-			(((vars[:xf] - vars[:xo]) * vars[:ay]))/Math.sin(2 * vars[:theta])**(1/2.0)
+			(((vars[:xf] - vars[:xo]) * -vars[:ay]))/Math.sin(2 * (vars[:theta] / (180/Math::PI)))**(1/2.0)
 	  when :theta
-			Math.asin((((vars[:xf] - vars[:xo]) * vars[:ay])) / vars[:vo]**2) / 2
+			(Math.asin((((vars[:xf] - vars[:xo]) * -vars[:ay])) / vars[:vo]**2) / 2) * (180/Math::PI)
 		end
 	end
 	
@@ -225,11 +224,11 @@ class Projectile < Formulaic
 		#ymax = ((vo**2)*(Math.sin(theta)**2))/(2g)
 		case unknown
 		when :ymax
-			(((vars[:vo]**2) * (Math.sin(vars[:theta])**2)) / (2 *vars[:ay]))
+			(((vars[:vo]**2) * (Math.sin((vars[:theta] / (180/Math::PI))**2))) / (2 * -vars[:ay]))
 		when :vo
-			((vars[:ymax] * (2 * vars[:ay])) / (Math.sin(vars[:theta])**2)) / 2
+			((vars[:ymax] * (2 * -vars[:ay])) / (Math.sin((vars[:theta] / (180/Math::PI))**2))) / 2
 		when :theta
-			Math.asin(((vars[:ymax] * (2 * vars[:ay])) / (vars[:vo]**2))**(1/2.0))
+			(Math.asin(((vars[:ymax] * (2 * -vars[:ay])) / (vars[:vo]**2))**(1/2.0))) * (180/Math::PI)
 		end
 	end
 	
@@ -237,11 +236,11 @@ class Projectile < Formulaic
 		#t = (2 * vo * Math.sin(theta))/g
 		case unknown
 		when :t
-			(((2 * vars[:vo]) * (Math.sin(vars[:theta]))) / vars[:ay])
+			(((2 * vars[:vo]) * (Math.sin(vars[:theta]))) / -vars[:ay])
 		when :vo
-			((vars[:t] * vars[:ay]) / (Math.sin(vars[:theta]))) / 2
+			((vars[:t] * -vars[:ay]) / (Math.sin(vars[:theta]))) / 2
 		when :theta
-			Math.asin((vars[:t] * vars[:ay]) / (2 * vars[:vo]))
+			Math.asin((vars[:t] * -vars[:ay]) / (2 * vars[:vo]))
 		end
 	end
 	
@@ -275,7 +274,7 @@ class Projectile < Formulaic
 	def twenty2(unknown)
 		case unknown
 		when :vfy
-			vars[:voy]**2 + 2 * vars[:ay] * (vars[:yf] - vars[:yo])
+			-(vars[:voy]**2 + (2 * vars[:ay] * (vars[:yf] - vars[:yo])))**(1.0/2)
 		when :voy
 			(vars[:vfy]**2 - (2 * vars[:ay] * (vars[:yf] - vars[:yo])))**(1.0/2)
 		when :yf
@@ -287,9 +286,10 @@ class Projectile < Formulaic
 
 	#twenty2 with only ymax
 	def soloMax(unknown)
+		#vf^2 = vo^2 + 2a/\y | 0 = vo^2 + 2a/\y | vo = sqrt(-2a/\y)
 		case unknown
 		when :voy
-			(-1.0 * (2 * vars[:ay] * (vars[:ymax] - vars[:yo])))**(1.0/2)
+			(2 * -vars[:ay] * (vars[:ymax] - vars[:yo]))**(1.0/2)
 		when :ymax
 			vars[:yo] + ((-1.0 * vars[:voy]**2) / (2 * vars[:ay]))
 		when :yo
@@ -300,7 +300,7 @@ class Projectile < Formulaic
 	def voof(unknown)
 		case unknown
 		when :theta
-			Math.atan(vars[:voy] / vars[:vox])
+			Math.atan(vars[:voy] / vars[:vox]) * (180.0/Math::PI)
 		when :vox
 			vars[:vo] * Math.cos(vars[:theta])
 		when :voy
@@ -310,18 +310,17 @@ class Projectile < Formulaic
 	
 	#not formulas
 	def resolve
-		if (vars[:vo] && vars[:theta] && !vars[:vox] && !vars[:voy])
+		if (vars[:vo] && vars[:theta] && !vars[:vox] && !vars[:voy]) then
 			vars[:vox] = vars[:vo] * Math.cos(vars[:theta])
 			vars[:voy] = vars[:vo] * Math.sin(vars[:theta])
 		end
 	end
 	
 	def incite
-		if (!vars[:vo] && vars[:vox] && vars[:voy])
+		if (!vars[:vo] && vars[:vox] && vars[:voy]) then
 			vars[:vo] = (vars[:vox]**2 + vars[:voy]**2)**(1.0/2)
 		end
 	end
-	
 end
 
 a = {a: -9.8, dx: 10, vo: 7, dy: nil}
@@ -335,6 +334,37 @@ puts kine.twenty2(:a)
 puts kine.vars[:a]
 ###^ tests
 =end
+
+def unitTest
+	form = Projectile.new(45, 0, 10.19716, 0, 0, 10, -10, 1.442096, 7.07106781187, 7.07106781187, 7.07106781187, -7.07106781187, 2.54929)
+	puts form.vars
+	hash = {}
+	arr = []
+	form.methods.each do |val|
+		if (form.formulas.include?(val.to_sym)) then
+			valSymbol = form.formulas[val.to_sym][0]
+			puts valSymbol.to_s
+			trueVal =  form.vars[valSymbol]
+			puts trueVal.to_s
+			calculatedVal = form.send(val, valSymbol)
+			puts calculatedVal.to_s
+			#solved value = projectile.vat(unknownKey)
+			#if solved value doesn't equal programmed
+			if (trueVal != calculatedVal) then
+				hash[val] = "Issue with formula #{val.to_sym}\n#{valSymbol} should be #{trueVal}, but is #{calculatedVal} instead"
+			end
+			end
+	end
+	hash.each {|key, val| arr << val}
+	puts arr.join("\n")
+	puts "exiting unit test"
+end
+
+
+
+
+
+unitTest
 
 puts "Welcome to physicsFill\n"+
 	"choose a mode:\n"+
